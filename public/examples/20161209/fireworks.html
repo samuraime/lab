@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>小尾巴变烟花</title>
+  <style type="text/css">
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+  }
+  </style>
+</head>
+<body>
+  <canvas></canvas>
+  <script type="text/javascript">
+  function Circle(radius, color = '#000') {
+    this.x = 0;
+    this.y = 0;
+    this.oldX = 0;
+    this.oldY = 0;
+    this.radius = radius;
+    this.color = color;
+  }
+  Circle.prototype.draw = function(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(0, 0, this.radius, 0, 2 * Math.PI, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  };
+  function Tail(size = 10, count = 5, color = '#000') {
+    const sizeStep = size / count;
+    this.x = 0;
+    this.y = 0;
+    this.oldX = 0;
+    this.oldY = 0;
+    this.spring = 0.5;
+    this.nodes = new Array(count).fill(0).map((d, i) => new Circle(size - i * sizeStep, color));
+  }
+  Tail.prototype.draw = function(ctx) {
+    this.oldX = this.x;
+    this.oldY = this.y;
+    this.nodes.forEach((node, i) => {
+      node.oldX = node.x;
+      node.oldY = node.y;
+      const prevX = i === 0 ? this.x : this.nodes[i - 1].x;
+      const prevY = i === 0 ? this.y : this.nodes[i - 1].y;
+      node.x += (prevX - node.x) * this.spring;
+      node.y += (prevY - node.y) * this.spring;
+    });
+    this.nodes.reverse().forEach((node) => {
+      node.draw(ctx);
+    });
+    this.nodes.reverse();
+  };
+  Tail.prototype.initPosition = function (x, y) {
+    this.nodes.concat(this).forEach((d) => {
+      d.x = x;
+      d.y = y;
+      d.oldX = x;
+      d.oldY = y;
+    });
+  };
+  function Firework(x, target) {
+    this.color = '#fff';
+    this.size = 2;
+    this.launched = true;
+    this.exploded = false;
+    this.ended = false;
+    this.x = x;
+    this.y = 0;
+    this.v = 0;
+    // 爆炸高度
+    this.target = target;
+    this.tail = new Tail(this.size, 50, this.color);
+    this.tail.spring = 0.6;
+    this.tail.initPosition(x, 0);
+    // 爆炸后的碎片
+    const num = 32;
+    this.fragments = new Array(num).fill(0).map((d, i) => {
+      const v = 1;
+      const tail = new Tail(1, 20, this.color);
+      tail.spring = 0.2;
+      tail.initPosition(x, target);
+      tail.angle = Math.PI * 2 / num * i;
+      tail.vx = Math.cos(tail.angle) * v;
+      tail.vy = Math.sin(tail.angle) * v;
+      return tail;
+    });
+  }
+  Firework.prototype.gravitate = function () {
+    const gravity = 0.001;
+    this.v -= gravity;
+  };
+  Firework.prototype.move = function () {
+    if (this.ended) {
+      return;
+    }
+    if (this.launched && !this.exploded) {
+      this.y += this.v;
+      this.tail.y = this.y;
+      this.gravitate();
+      if (this.y > this.target || this.v < 0) {
+        this.exploded = true;
+      }
+    }
+    if (this.launched && this.exploded) {
+      this.fragments.forEach((d, i) => {
+        d.x += d.vx * 0.5;
+        d.y += d.vy * 0.5;
+      });
+    }
+  };
+  Firework.prototype.draw = function (ctx) {
+    if (this.ended) {
+      return;
+    }
+    if (this.launched && !this.exploded) {
+      this.tail.draw(ctx);
+    }
+    if (this.launched && this.exploded) {
+      this.fragments.forEach((d) => {
+        d.draw(ctx);
+      });
+    }
+  };
+  function captureMouse(element) {
+    const mouse = { x: 0, y: 0 };
+    element.addEventListener('mousemove', (event) => {
+      mouse.x = event.pageX - element.offsetLeft;
+      mouse.y = event.pageY - element.offsetTop;
+    }, false);
+    return mouse;
+  }
+  window.onload = () => {
+    const canvas = document.querySelector('canvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const mouse = captureMouse(canvas);
+    const ctx = canvas.getContext('2d');
+    const fireworks = [];
+    canvas.onclick = function () {
+      const firework = new Firework(mouse.x, mouse.y);
+      console.log(mouse.x, mouse.y);
+      firework.v = 4 + Math.random();
+      fireworks.push(firework);
+    };
+    (function drawFrame() {
+      window.requestAnimationFrame(drawFrame);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      fireworks.forEach((d, i, a) => {
+        if (d.ended) {
+          a.splice(i, 1);
+        } else {
+          d.move();
+        }
+      });
+      fireworks.forEach(d => d.draw(ctx));
+    })();
+  };
+  </script>
+</body>
+</html>
