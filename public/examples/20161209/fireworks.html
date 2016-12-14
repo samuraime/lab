@@ -67,25 +67,31 @@
       d.oldY = y;
     });
   };
-  function Firework(x, target) {
+  Tail.prototype.setColor = function(color) {
+    this.nodes.forEach((node) => {
+      node.color = color;
+    });
+  };
+  function Firework(x, y, target) {
     this.color = '#fff';
-    this.size = 2;
+    this.flareAlpha = 1;
+    this.flareColor = `hsla(${360 * Math.random()}, 60%, 60%, ${this.flareAlpha})`;
+    this.size = 1;
     this.launched = true;
     this.exploded = false;
     this.ended = false;
     this.x = x;
-    this.y = 0;
-    this.v = 0;
+    this.y = y;
     // 爆炸高度
     this.target = target;
-    this.tail = new Tail(this.size, 50, this.color);
+    this.tail = new Tail(this.size, 30, this.color);
     this.tail.spring = 0.6;
-    this.tail.initPosition(x, 0);
+    this.tail.initPosition(x, y);
     // 爆炸后的碎片
     const num = 32;
     this.fragments = new Array(num).fill(0).map((d, i) => {
       const v = 1;
-      const tail = new Tail(1, 20, this.color);
+      const tail = new Tail(1, 15, this.flareColor);
       tail.spring = 0.2;
       tail.initPosition(x, target);
       tail.angle = Math.PI * 2 / num * i;
@@ -94,27 +100,30 @@
       return tail;
     });
   }
-  Firework.prototype.gravitate = function () {
-    const gravity = 0.001;
-    this.v -= gravity;
-  };
   Firework.prototype.move = function () {
     if (this.ended) {
       return;
     }
     if (this.launched && !this.exploded) {
-      this.y += this.v;
+      this.y += (this.target - this.y) * 0.1;
       this.tail.y = this.y;
-      this.gravitate();
-      if (this.y > this.target || this.v < 0) {
+      if (this.y < this.target + 1) {
         this.exploded = true;
       }
     }
     if (this.launched && this.exploded) {
-      this.fragments.forEach((d, i) => {
-        d.x += d.vx * 0.5;
-        d.y += d.vy * 0.5;
-      });
+      const anyone = this.fragments[0];
+      if (this.flareAlpha < 0.001) {
+        this.ended = true;
+      } else {
+        this.flareAlpha -= 0.008;
+        this.flareColor = this.flareColor.replace(/([\d\.]+)\)$/, `${this.flareAlpha})`);
+        this.fragments.forEach((d, i) => {
+          d.setColor(this.flareColor);
+          d.x += d.vx * 0.5;
+          d.y += d.vy * 0.5;
+        });
+      }
     }
   };
   Firework.prototype.draw = function (ctx) {
@@ -130,6 +139,7 @@
       });
     }
   };
+
   function captureMouse(element) {
     const mouse = { x: 0, y: 0 };
     element.addEventListener('mousemove', (event) => {
@@ -146,8 +156,7 @@
     const ctx = canvas.getContext('2d');
     const fireworks = [];
     canvas.onclick = function () {
-      const firework = new Firework(mouse.x, mouse.y);
-      console.log(mouse.x, mouse.y);
+      const firework = new Firework(mouse.x, canvas.height, mouse.y);
       firework.v = 4 + Math.random();
       fireworks.push(firework);
     };
