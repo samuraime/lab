@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Device Orientation API</title>
+</head>
+<body>
+  <p>
+    <a href="http://caniuse.com/#search=DeviceOrientation">Compatibility</a>
+  </p>
+  <div>
+    <p>orientation</p>
+    <p>
+      <textarea id="orientation" rows="5" style="width: 100%"></textarea>
+    </p>
+  </div>
+  <div>
+    <p>motion</p>
+    <p>
+      <textarea id="motion" rows="5" style="width: 100%"></textarea>
+    </p>
+  </div>
+  <script type="text/javascript">
+    const orientation = document.querySelector('#orientation');
+    const motion = document.querySelector('#motion');
+
+    function infoOrientation(e) {
+      const keys = ['absolute', 'alpha', 'beta', 'gamma'];
+      orientation.value = keys.map(key => `${key}: ${e[key]}`).join('\n');
+    }
+    function infoMotion(e) {
+      const keys = ['acceleration', 'accelerationIncludingGravity', 'rotationRate', 'interval'];
+      motion.value = keys.map(key => `${key}: ${e[key]}`).join('\n');
+    }
+    window.addEventListener('deviceorientation', infoOrientation);
+    window.addEventListener('devicemotion', infoMotion);
+  </script>
+</body>
+</html>

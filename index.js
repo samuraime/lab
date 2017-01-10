@@ -10,4 +10,6 @@ const publicDir = path.join(__dirname, 'public');
 app.use(serveIndex(publicDir));
 app.use(serve(publicDir));
 
-app.listen(3000);
+const port = process.NODE_PORT || 3000;
+app.listen(port);
+console.log(`Listening on port ${port}`);
