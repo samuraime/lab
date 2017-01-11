@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compass</title>
+  <style type="text/css">
+  text {
+    text-anchor: middle;
+    alignment-baseline: central;
+  }
+  .container {
+    margin-top: 20px;
+    text-align: center;
+  }
+  </style>
+</head>
+<body>
+  <h1>Compass</h1>
+  <div class="container">
+    <svg viewBox="0 0 200 200" width="200">
+      <g>
+        <circle cx="100" cy="100" r="80" fill="none" stroke="#000"/>
+        <text x="100" y="10">N</text>
+        <text x="190" y="100">E</text>
+        <text x="100" y="190">S</text>
+        <text x="10" y="100">W</text>
+      </g>
+      <path d="M99.5,100 v-60 h-1.5 l2,-8 l2,8 h-1.5 v60 z" stroke="#000" />
+    </svg>
+  </div>
+  <script src="/js/dat.gui.min.js"></script>
+  <script type="text/javascript">
+    const compass = {
+      mode: 'compass',
+      alpha: 0,
+    };
+    const panel = document.querySelector('g');
+    const pointer = document.querySelector('path');
+
+    const gui = new dat.GUI();
+    gui.add(compass, 'alpha').listen();;
+    gui.add(compass, 'mode', { 'compass fixed': 'compass', 'pointer fixed': 'pointer' });
+
+    window.addEventListener('deviceorientation', function(e) {
+      compass.alpha = e.alpha;
+      if (compass.mode === 'compass') {
+        panel.removeAttribute('transform');
+        pointer.setAttribute('transform', 'rotate(' + (-e.alpha) + ', 100, 100)');
+      } else {
+        pointer.removeAttribute('transform');
+        panel.setAttribute('transform', 'rotate(' + e.alpha + ', 100, 100)');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Flex Basic Layout</title>
+  <style type="text/css">
+  body {
+    margin: 0;
+  }
+
+  header {
+    /* for box-shadow */
+    position: relative;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    padding: 0 1.5rem;
+    color: #fff;
+    background: #333;
+    box-shadow: 0 0 10px #000;
+  }
+  header ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+  }
+  header li {
+    margin-right: 1rem;
+  }
+  header a {
+    color: #fff;
+  }
+
+  .main {
+    display: flex;
+    min-height: 500px;
+  }
+  .subnav {
+    flex: 1 1 0;
+    min-width: 200px;
+    background: hsl(240, 50%, 50%);
+  }
+  .content {
+    flex: 5 5 0;
+    background: hsl(220, 50%, 50%);
+  }
+  </style>
+</head>
+<body>
+  <header>
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="#">About</a></li>
+    </ul>
+  </header>
+  <div class="main">
+    <div class="subnav">left nav</div>
+    <div class="content">content</div>
+  </div>
+</body>
+</html>
