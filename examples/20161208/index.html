@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>规则分布的星云</title>
+  <style type="text/css">
+  body {
+    background: #000;
+  }
+  </style>
+</head>
+<body>
+  <canvas></canvas>
+  <script type="text/javascript">
+  function Circle(radius, color = '#000') {
+    this.x = 0;
+    this.y = 0;
+    this.radius = radius;
+    this.color = color;
+  }
+  Circle.prototype.draw = function(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.fillStyle = this.color;
+    ctx.beginPath();
+    ctx.arc(0, 0, this.radius, 0, 2 * Math.PI, true);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  };
+  function captureMouse(element) {
+    const mouse = { x: 0, y: 0 };
+    element.addEventListener('mousemove', (event) => {
+      mouse.x = event.pageX - element.offsetLeft;
+      mouse.y = event.pageY - element.offsetTop;
+    }, false);
+    return mouse;
+  }
+  window.onload = () => {
+    const canvas = document.querySelector('canvas');
+    const { random, abs } = Math;
+    canvas.width = 600;
+    canvas.height = 600;
+    const mouse = captureMouse(canvas);
+    const ctx = canvas.getContext('2d');
+    const num = 4000;
+    const center = {
+      x: canvas.width / 2,
+      y: canvas.height / 2,
+    };
+    const circles = new Array(num).fill(0).map((d, i) => {
+      const radius = random() * 1;
+      const hue = random() * 360;
+      const circle = new Circle(radius, `hsl(${hue}, 80%, 80%)`);
+      const x = random() * canvas.width;
+      const y = random() * canvas.height;
+      circle.x = (x - center.x) * abs(x - center.x) / center.x + center.x;
+      circle.y = (y - center.y) * abs(y - center.y) / center.y + center.y;
+      return circle;
+    });
+    (function drawFrame() {
+      window.requestAnimationFrame(drawFrame);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      circles.forEach((circle, i) => {
+        circle.draw(ctx);
+      });
+    })();
+  };
+  </script>
+</body>
+</html>

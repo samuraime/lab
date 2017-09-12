@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Web Notification API</title>
+</head>
+<body>
+  <h1>Web Notification</h1>
+  <p><a href="http://caniuse.com/#search=Web%20Notification">Compatibility</a></p>
+  <button id="notify">Notify</button>
+  <button id="close">Close</button>
+  <script type="text/javascript">
+  window.onload = function() {
+    Notification.requestPermission(console.log);
+
+    const notifyBtn = document.querySelector('#notify');
+    const closeBtn = document.querySelector('#close');
+    const notificationQueue = [];
+
+    notifyBtn.onclick = function() {
+      if (Notification.permission !== 'granted') {
+        Notification.requestPermission();
+      }
+      // 手机浏览器似乎都无法唤起通知
+      const notification = new Notification('notification title', {
+        body: 'notification body',
+        icon: 'https://www.gravatar.com/avatar/18058a53188c8e21c92610718766b7f9?s=400',
+        vibrate: [200, 100, 200],
+      });
+      notification.onerror = console.log;
+      notification.onshow = console.log;
+      notification.onclose = console.log;
+      notification.onclick = function() {
+        console.log('switch to notification tab');
+      };
+      notificationQueue.push(notification);
+    };
+    closeBtn.onclick = function() {
+      const latest = notificationQueue.pop();
+      if (latest) {
+        latest.close();
+      }
+    };
+  };
+  </script>
+</body>
+</html>

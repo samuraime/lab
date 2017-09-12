@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Device Orientation API</title>
+</head>
+<body>
+  <p>
+    <a href="http://caniuse.com/#search=DeviceOrientation">Compatibility</a>
+  </p>
+  <div>
+    <p>orientation</p>
+    <pre id="orientation" rows="5"></pre>
+  </div>
+  <div>
+    <p>motion</p>
+    <pre id="motion" rows="5"></pre>
+  </div>
+  <script src="/libs/dat.gui.min.js"></script>
+  <script type="text/javascript">
+    const orientation = document.querySelector('#orientation');
+    const motion = document.querySelector('#motion');
+
+    const deviceOrientation = {
+      absolute: true,
+      alpha: 0.0,
+      beta: 0.0,
+      gamma: 0.0,
+    };
+    const gui = new dat.GUI();
+    gui.add(deviceOrientation, 'absolute').listen();;
+    gui.add(deviceOrientation, 'alpha').listen();;
+    gui.add(deviceOrientation, 'beta').listen();;
+    gui.add(deviceOrientation, 'gamma').listen();;
+
+    function infoOrientation(e) {
+      // Wechat support the API
+      console.log(e);
+      const keys = ['absolute', 'alpha', 'beta', 'gamma'];
+      // orientation.value = keys.map(key => `${key}: ${e[key]}`).join('\n');
+      orientation.innerText = keys.map(function(key) {
+        deviceOrientation[key] = e[key];
+        return key + ': ' + e[key]
+      }).join('\n');
+    }
+    function infoMotion(e) {
+      console.log(e);
+
+      const keys = ['acceleration', 'accelerationIncludingGravity', 'rotationRate', 'interval'];
+      // motion.value = keys.map(key => `${key}: ${JSON.stringify(e[key])}`).join('\n');
+      motion.innerText = keys.map(function(key) {
+        return key + ': ' + JSON.stringify(e[key]);
+      }).join('\n');
+    }
+    window.addEventListener('deviceorientation', infoOrientation);
+    window.addEventListener('devicemotion', infoMotion);
+  </script>
+</body>
+</html>
